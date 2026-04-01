@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	/* Modern Trading Platform - Deep Ocean */
+	--color-primary: #ffffff; /* cyan - action/primary */
+	--color-secondary: #c9c8cc; /* purple - secondary/premium */
+	--color-accent: #7b75b1; /* amber - highlights/warnings */
+	--color-contrast: #10b981; /* emerald - success/gains */
+	--color-neutral: #64748b; /* slate gray */
+	--color-text: #f1f5f9; /* off-white text */
+	--color-surface: #0c1222; /* deep ocean background */
+	--color-surface-alt: #1a2332; /* elevated panels */
+}
+
+@layer utilities {
+	.bg-page { background-color: var(--color-surface); }
+	.bg-panel { background-color: var(--color-surface-alt); }
+	.bg-panel-soft { background-color: color-mix(in srgb, var(--color-surface) 65%, var(--color-surface-alt)); }
+
+	.text-ink { color: var(--color-text); }
+	.text-primary { color: var(--color-primary); }
+	.text-secondary { color: var(--color-secondary); }
+	.text-contrast { color: var(--color-contrast); }
+	.text-neutral { color: var(--color-neutral); }
+
+	.border-accent { border-color: var(--color-accent); }
+	.border-contrast { border-color: var(--color-contrast); }
+	.border-primary { border-color: var(--color-primary); }
+	.border-neutral { border-color: var(--color-neutral); }
+
+	.bg-gradient-primary { background-image: linear-gradient(90deg, var(--color-primary), var(--color-contrast)); }
+	.shadow-accent { box-shadow: 0 10px 40px color-mix(in srgb, var(--color-accent) 25%, transparent); }
+
+	.hover\:bg-panel:hover { background-color: var(--color-surface-alt); }
+	.hover\:text-primary:hover { color: var(--color-primary); }
+	.hover\:border-accent:hover { border-color: var(--color-accent); }
+
+	/* Semantic helpers */
+	.btn-primary {
+		background-color: color-mix(in srgb, var(--color-primary) 10%, rgb(1, 84, 52));
+		color: var(--color-text);
+		border: 1px solid var(--color-primary);
+		border-radius: 0.75rem;
+		transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+	}
+	.btn-primary:hover { filter: brightness(0.9); box-shadow: 0 12px 34px color-mix(in srgb, var(--color-primary) 32%, transparent); }
+	.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+	.theme-card {
+		background-color: var(--color-surface-alt);
+		border: 1px solid color-mix(in srgb, var(--color-neutral) 60%, transparent);
+		border-radius: 1rem;
+		color: var(--color-text);
+	}
+
+	.theme-input {
+		background-color: color-mix(in srgb, var(--color-surface-alt) 90%, black 0%);
+		border: 1px solid color-mix(in srgb, var(--color-neutral) 70%, transparent);
+		color: var(--color-text);
+		border-radius: 0.75rem;
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	}
+	.theme-input::placeholder { color: var(--color-secondary); }
+	.theme-input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 40%, transparent); }
+}
