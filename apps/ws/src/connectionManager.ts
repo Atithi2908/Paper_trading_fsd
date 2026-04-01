@@ -117,3 +117,61 @@ function unsubscribeClientFromSymbol(ws: WebSocket, symbol: string) {
 
   console.log(`🔕 Client unsubscribed from ${symbol}`);
 }
+
+finnhubSocket.on("message", async (msg) => {
+  let parsed;
+  try {
+    parsed = JSON.parse(msg.toString());
+    console.log(
+  "📈 FINNHUB RAW SYMBOLS =",
+  parsed.data?.map((t: any) => t.s)
+);
+
+    console.log("message recieved from finhub websocket");
+    console.log(parsed);
+  } catch (e) {
+    console.warn("Received non-JSON message from Finnhub:", msg.toString());
+    return;
+  }
+
+  if (parsed.type === "trade" && Array.isArray(parsed.data)) {
+
+    const bySymbol = new Map<string, any[]>();
+
+    for (const tick of parsed.data) {
+      const symbol = (tick.s || tick.symbol || "").toString().toUpperCase();
+      if (!symbol) continue;
+
+      await redis.set(`price:${symbol}`, JSON.stringify({
+        price: tick.p,
+        ts: Date.now()
+      }));
+
+      if (!bySymbol.has(symbol)) bySymbol.set(symbol, []);
+      bySymbol.get(symbol)!.push(tick);
+    }
+
+    for (const [symbol, ticks] of bySymbol.entries()) {
+      const subs = symbolSubscribers.get(symbol);
+      console.log("subsrcibers are");
+      console.log(subs);
+      console.log(
+  "🧪 SUBSCRIBER CHECK",
+  "symbol =", symbol,
+  "hasSymbol =", symbolSubscribers.has(symbol),
+  "totalSymbols =", [...symbolSubscribers.keys()],
+  "subsSize =", symbolSubscribers.get(symbol)?.size
+);
+
+      if (!subs) continue;
+
+      const payload = JSON.stringify({ type: "trade", symbol, data: ticks });
+
+      for (const client of subs) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(payload);
+        }
+      }
+    }
+  }
+});
