@@ -2,11 +2,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-
 import './App.css'
 
 import Home from "./pages/Home";
+import LandingPage from "./pages/Landing";
+import Portfolio from "./pages/Portfolio";
+import OrderHistory from "./pages/OrderHistory";
 import ExchangePage from "./pages/ExchangePage";
 import DerivativesPage from "./pages/DerivativesPage";
+import LearnPage from "./pages/LearnPage";
 import FaqPage from "./pages/FaqPage";
-import LandingPage from "./pages/Landing";
-
+import SnapshotsPage from "./pages/SnapshotsPage";
 
 function ProtectedRoute() {
   const token = localStorage.getItem("Token");
@@ -23,10 +26,14 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/exchange" element={<ExchangePage />} />
         <Route path="/derivatives" element={<DerivativesPage />} />
+        <Route path="/learn" element={<LearnPage />} />
         <Route path="/faq" element={<FaqPage />} />
+        <Route path="/snapshots" element={<SnapshotsPage />} />
         
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />
+          <Route path="/portfolio" element={<Portfolio/>}/>
+          <Route path="/orders" element={<OrderHistory/>}/>
         </Route>
         
       </Routes>
