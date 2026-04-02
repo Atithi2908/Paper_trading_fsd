@@ -3,8 +3,10 @@ import './App.css'
 
 import Home from "./pages/Home";
 import LandingPage from "./pages/Landing";
+import { StockDetailsPage } from "./pages/Stock";
 import Portfolio from "./pages/Portfolio";
 import OrderHistory from "./pages/OrderHistory";
+import TradeHistory from "./pages/TradeHistory";
 import ExchangePage from "./pages/ExchangePage";
 import DerivativesPage from "./pages/DerivativesPage";
 import LearnPage from "./pages/LearnPage";
@@ -32,8 +34,10 @@ function App() {
         
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />
+          <Route path="/stocks/:symbol" element={<StockDetailsPage/>} />
           <Route path="/portfolio" element={<Portfolio/>}/>
           <Route path="/orders" element={<OrderHistory/>}/>
+          <Route path="/trades" element={<TradeHistory/>}/>
         </Route>
         
       </Routes>
