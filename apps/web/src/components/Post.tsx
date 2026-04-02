@@ -4,8 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 
 interface User {
   id: string;
-  name: string;
-  avatarUrl?: string;
+  name: string;  avatarUrl?: string;
 }
 
 interface Post {
