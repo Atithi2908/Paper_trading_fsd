@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - redis-data:/data
+
+  http:
+    build:
+      context: .
+      dockerfile: apps/http/Dockerfile
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "3001:3000"
+    environment:
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+
+  ws:
+    build:
+      context: .
+      dockerfile: apps/ws/Dockerfile
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "3002:4000"
+    environment:
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_BASE_URL: https://tradeincase.mooo.com
+        VITE_WS_URL: wss://tradeincase.mooo.com/ws/
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - http
+      - ws
+
+volumes:
+  redis-data:

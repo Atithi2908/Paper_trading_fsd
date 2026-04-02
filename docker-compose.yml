@@ -1,0 +1,51 @@
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:3000
+        VITE_WS_URL: ws://localhost:4000  
+    ports:
+      - "80:80"
+    env_file:
+      - apps/web/.env
+    depends_on:
+      - http
+      - ws
+
+  http:
+    build:
+      context: .
+      dockerfile: apps/http/Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - apps/http/.env
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  ws:
+    build:
+      context: .
+      dockerfile: apps/ws/Dockerfile
+    ports:
+      - "4000:4000"
+    env_file:
+      - apps/ws/.env
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  redis:
+        image: redis:7-alpine
+        ports:
+          - "6379:6379"
+        volumes:
+          - redis-data:/data
+        restart: unless-stopped
+
+volumes:
+  redis-data:
