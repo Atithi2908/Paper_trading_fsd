@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import ExchangePage from "./pages/ExchangePage";
 import DerivativesPage from "./pages/DerivativesPage";
 import FaqPage from "./pages/FaqPage";
+import LandingPage from "./pages/Landing";
 
 
 function ProtectedRoute() {
@@ -19,6 +20,7 @@ function ProtectedRoute() {
 function App() {
     return( <Router>
       <Routes>
+        <Route path="/" element={<LandingPage />} />
         <Route path="/exchange" element={<ExchangePage />} />
         <Route path="/derivatives" element={<DerivativesPage />} />
         <Route path="/faq" element={<FaqPage />} />
