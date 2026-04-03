@@ -11,11 +11,7 @@ export function setupPriceFeed() {
         const symbol = trade.s;
         const price = trade.p;
         const timestamp = trade.t;
-
-        // Publish to Pub/Sub channel
-        await redis.publish("price-updates", JSON.stringify({ symbol, price, timestamp }));
-
-        // Store latest price in a hash
+        await redis.publish("price-updates", JSON.stringify({ symbol, price, timestamp }));        
         await redis.set(`price:${symbol}`, JSON.stringify({ price, timestamp }));
       }
     } catch (err) {

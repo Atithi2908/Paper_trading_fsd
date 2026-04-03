@@ -21,13 +21,13 @@ export async function executeLimitOrderTrade(order: Order, price: number) {
         },
         update: {
           quantity: { increment: order.quantity },
-          averagePrice: { set: price }, // This should be a weighted average
+          avgBuyPrice: { set: price }, // This should be a weighted average
         },
         create: {
           userId: order.userId,
           stockId: order.stockId,
           quantity: order.quantity,
-          averagePrice: price,
+          avgBuyPrice: price,
         },
       }),
       // Update order status
