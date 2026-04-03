@@ -7,7 +7,7 @@ import stockRoutes from "./routes/stock";
 import orderRoutes from "./routes/order";
 import userRoutes from "./routes/user";
 import cors from "cors";
-import { startLimitOrderCron } from './cron/limitOrderCron';
+//import { startLimitOrderCron } from './cron/limitOrderCron';
 
 
 const app = express();
@@ -21,6 +21,6 @@ app.use('/post',postRoute);
 app.use('/stock',stockRoutes);
 app.use('/order', orderRoutes);
 app.use("/user",userRoutes);
-startLimitOrderCron();
+//startLimitOrderCron();
 
 app.listen(3000, () => console.log("Server is running on port 3000"));

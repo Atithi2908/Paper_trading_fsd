@@ -60,7 +60,7 @@ export const getStockInfo = async (req: Request, res: Response) => {
       {
         params: {
           interval: "1d",
-          range: "1d"
+          range: "1m"
         }
       }
     );

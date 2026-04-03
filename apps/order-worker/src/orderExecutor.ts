@@ -6,12 +6,12 @@ export async function executeLimitOrderTrade(order: Order, price: number) {
 
   if (order.side === "BUY") {
     await prisma.$transaction([
-      // Debit user's wallet
+      
       prisma.wallet.update({
         where: { userId: order.userId },
         data: { balance: { decrement: totalCost } },
       }),
-      // Create a holding
+      
       prisma.Position.upsert({
         where: {
           userId_stockId: {
@@ -30,7 +30,6 @@ export async function executeLimitOrderTrade(order: Order, price: number) {
           avgBuyPrice: price,
         },
       }),
-      // Update order status
       prisma.order.update({
         where: { id: order.id },
         data: { status: "EXECUTED", executionPrice: price },
@@ -55,7 +54,7 @@ export async function executeLimitOrderTrade(order: Order, price: number) {
           quantity: { decrement: order.quantity },
         },
       }),
-      // Update order status
+      
       prisma.order.update({
         where: { id: order.id },
         data: { status: "EXECUTED", executionPrice: price },

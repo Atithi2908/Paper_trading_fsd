@@ -1,7 +1,8 @@
 import Redis from "ioredis";
 import { processLimitOrders } from "./orderExecutor";
-
-const redis = new Redis();
+import { configDotenv } from "dotenv";
+configDotenv(); 
+const redis = new Redis(process.env.REDIS_URL!);
 
 async function main() {
     console.log("🚀 Order worker started");
