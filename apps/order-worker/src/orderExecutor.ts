@@ -11,8 +11,8 @@ export async function executeLimitOrderTrade(order: Order, price: number) {
         where: { userId: order.userId },
         data: { balance: { decrement: totalCost } },
       }),
-      
-      prisma.Position.upsert({
+      // Create a holding
+      prisma.position.upsert({
         where: {
           userId_stockId: {
             userId: order.userId,
@@ -43,7 +43,7 @@ export async function executeLimitOrderTrade(order: Order, price: number) {
         data: { balance: { increment: totalCost } },
       }),
       // Decrease holding
-      prisma.Position.update({
+      prisma.position.update({
         where: {
           userId_stockId: {
             userId: order.userId,
