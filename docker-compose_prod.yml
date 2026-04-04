@@ -35,6 +35,18 @@ services:
     depends_on:
       - redis
 
+  order-worker:
+    build:
+      context: .
+      dockerfile: apps/order-worker/Dockerfile
+    restart: always
+    env_file:
+      - .env
+    environment:
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+
   web:
     build:
       context: .
