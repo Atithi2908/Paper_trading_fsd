@@ -4,63 +4,109 @@ import { prisma } from "./prisma";
 export async function executeLimitOrderTrade(order: Order, price: number) {
   const totalCost = order.quantity * price;
 
-  if (order.side === "BUY") {
-    await prisma.$transaction([
-      
-      prisma.wallet.update({
+  return await prisma.$transaction(async (tx: any) => {
+    if (order.side === "BUY") {
+      // Check wallet balance
+      const wallet = await tx.wallet.findUnique({
         where: { userId: order.userId },
-        data: { balance: { decrement: totalCost } },
-      }),
-      // Create a holding
-      prisma.position.upsert({
-        where: {
-          userId_stockId: {
+      });
+
+      if (!wallet || wallet.balance < totalCost) {
+        await tx.order.update({
+          where: { id: order.id },
+          data: { status: "CANCELLED" },
+        });
+        throw new Error("INSUFFICIENT_BALANCE_AT_EXECUTION");
+      }
+
+      // Deduct from wallet
+      await tx.wallet.update({
+        where: { userId: order.userId },
+        data: { balance: wallet.balance - totalCost },
+      });
+
+      // Get existing position
+      const pos = await tx.position.findFirst({
+        where: { userId: order.userId, stockId: order.stockId },
+      });
+
+      // Update or create position with weighted average
+      if (!pos) {
+        await tx.position.create({
+          data: {
             userId: order.userId,
             stockId: order.stockId,
+            quantity: order.quantity,
+            avgBuyPrice: price,
           },
-        },
-        update: {
-          quantity: { increment: order.quantity },
-          avgBuyPrice: { set: price }, // This should be a weighted average
-        },
-        create: {
-          userId: order.userId,
-          stockId: order.stockId,
-          quantity: order.quantity,
-          avgBuyPrice: price,
-        },
-      }),
-      prisma.order.update({
-        where: { id: order.id },
-        data: { status: "EXECUTED", executionPrice: price },
-      }),
-    ]);
-  } else { // SELL
-    await prisma.$transaction([
-      // Credit user's wallet
-      prisma.wallet.update({
-        where: { userId: order.userId },
-        data: { balance: { increment: totalCost } },
-      }),
+        });
+      } else {
+        const newQty = pos.quantity + order.quantity;
+        const newAvg =
+          (pos.avgBuyPrice * pos.quantity + price * order.quantity) / newQty;
+
+        await tx.position.update({
+          where: { id: pos.id },
+          data: {
+            quantity: newQty,
+            avgBuyPrice: newAvg,
+          },
+        });
+      }
+    } else { // SELL
+      // Check if position exists and has sufficient shares
+      const pos = await tx.position.findFirst({
+        where: { userId: order.userId, stockId: order.stockId },
+      });
+
+      if (!pos || pos.quantity < order.quantity) {
+        await tx.order.update({
+          where: { id: order.id },
+          data: { status: "CANCELLED" },
+        });
+        throw new Error("INSUFFICIENT_SHARES_AT_EXECUTION");
+      }
+
       // Decrease holding
-      prisma.position.update({
-        where: {
-          userId_stockId: {
-            userId: order.userId,
-            stockId: order.stockId,
-          },
-        },
-        data: {
-          quantity: { decrement: order.quantity },
-        },
-      }),
-      
-      prisma.order.update({
-        where: { id: order.id },
-        data: { status: "EXECUTED", executionPrice: price },
-      }),
-    ]);
-  }
+      await tx.position.update({
+        where: { id: pos.id },
+        data: { quantity: pos.quantity - order.quantity },
+      });
+
+      // Credit user's wallet
+      const wallet = await tx.wallet.findUnique({
+        where: { userId: order.userId },
+      });
+
+      await tx.wallet.update({
+        where: { userId: order.userId },
+        data: { balance: wallet!.balance + totalCost },
+      });
+    }
+
+    // Create trade record
+    const trade = await tx.trade.create({
+      data: {
+        orderId: order.id,
+        userId: order.userId,
+        stockId: order.stockId,
+        side: order.side,
+        quantity: order.quantity,
+        price,
+        amount: totalCost,
+      },
+    });
+
+    // Mark order as executed
+    await tx.order.update({
+      where: { id: order.id },
+      data: { status: "EXECUTED", executionPrice: price },
+    });
+
+    return trade;
+  }, {
+    isolationLevel: "Serializable",
+  });
 }
 
 export async function processLimitOrders(symbol: string, price: number) {
